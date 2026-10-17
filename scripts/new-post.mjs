@@ -114,7 +114,7 @@ for (const f of files) {
   try {
     const ex = await exifr.parse(abs, { pick: ['DateTimeOriginal', 'CreateDate', 'GPSLatitude', 'GPSLongitude', 'GPSLatitudeRef', 'GPSLongitudeRef'], gps: true });
     taken = ex?.DateTimeOriginal ?? ex?.CreateDate ?? null;
-    if (typeof ex?.latitude === 'number' && typeof ex?.longitude === 'number' && !(ex.latitude === 0 && ex.longitude === 0)) {
+    if (Number.isFinite(ex?.latitude) && Number.isFinite(ex?.longitude) && !(ex.latitude === 0 && ex.longitude === 0)) {
       lat = +ex.latitude.toFixed(6); lng = +ex.longitude.toFixed(6);
     }
   } catch { /* EXIF 없음 */ }
