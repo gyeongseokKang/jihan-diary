@@ -25,7 +25,7 @@ const places = [...new Set(locs.map((l) => l.place).filter(Boolean))];
     <header class="head">
       <time datetime={post.data.date.toISOString()}>{label}</time>
       <h1>{post.data.title}</h1>
-      {places.length > 0 && <p class="place">📍 {places.join(' · ')}</p>}
+      {places.length > 0 && <p class="place">📍 {places.join(" · ")} <span class="ai-note">(AI 작성)</span></p>}
     </header>
 
     {post.data.photos.length > 0 && (
@@ -59,6 +59,7 @@ const places = [...new Set(locs.map((l) => l.place).filter(Boolean))];
   .head time { color: var(--muted); font-size: .9rem; }
   .head h1 { margin: 4px 0 0; font-size: 1.5rem; line-height: 1.4; letter-spacing: -0.01em; }
   .place { margin: 6px 0 0; color: var(--muted); font-size: .88rem; }
+  .ai-note { font-size: .75rem; opacity: .8; }
   .photos { display: grid; gap: 10px; margin: 0 -18px 24px; }
   .photos img { width: 100%; height: auto; background: #f3ece3; }
   @media (min-width: 720px) { .photos { margin: 0 0 24px; } .photos img { border-radius: var(--radius); } }

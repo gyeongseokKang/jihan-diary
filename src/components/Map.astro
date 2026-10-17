@@ -42,7 +42,7 @@ const dates = [...new Set(markers.map((m) => m.date))].sort().reverse();
       const mk = L.circleMarker([m.lat, m.lng], {
         radius: 9, color: '#c9734f', weight: 2, fillColor: '#f0a882', fillOpacity: 0.9,
       }).bindPopup(
-        `<strong>${esc(m.title)}</strong><br><small>${esc(m.label)}${m.place ? ' · ' + esc(m.place) : ''}</small><br><a href="${esc(m.url)}">글 보기 →</a>`,
+        `<strong>${esc(m.title)}</strong><br><small>${esc(m.label)}${m.place ? ' · ' + esc(m.place) + ' (AI 작성)' : ''}</small><br><a href="${esc(m.url)}">글 보기 →</a>`,
       );
       return { m, mk };
     });
