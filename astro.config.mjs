@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://gyeongseokkang.github.io',
-  base: '/jihan-diary',
+  site: 'https://jihan-diary.vercel.app',
   trailingSlash: 'ignore',
 });
