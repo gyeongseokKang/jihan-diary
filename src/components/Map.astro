@@ -1,0 +1,71 @@
+---
+/**
+ * Leaflet + OpenStreetMap 지도 (API 키 불필요)
+ * markers: { lat, lng, title, date, url, place }
+ */
+export interface Marker { lat: number; lng: number; title: string; date: string; label: string; url: string; place?: string }
+interface Props { markers: Marker[]; height?: string; filter?: boolean }
+const { markers, height = '320px', filter = false } = Astro.props;
+const dates = [...new Set(markers.map((m) => m.date))].sort().reverse();
+---
+{filter && dates.length > 0 && (
+  <div class="map-filter">
+    <label for="map-date">날짜</label>
+    <select id="map-date">
+      <option value="">전체 ({markers.length})</option>
+      {dates.map((d) => {
+        const m = markers.find((x) => x.date === d)!;
+        const n = markers.filter((x) => x.date === d).length;
+        return <option value={d}>{m.label} ({n})</option>;
+      })}
+    </select>
+  </div>
+)}
+<div class="map" data-markers={JSON.stringify(markers)} style={`height:${height}`}></div>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+
+  const esc = (s: string) =>
+    s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+  document.querySelectorAll<HTMLElement>('.map').forEach((el) => {
+    const markers = JSON.parse(el.dataset.markers || '[]');
+    const map = L.map(el, { scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    const layers = markers.map((m: any) => {
+      const mk = L.circleMarker([m.lat, m.lng], {
+        radius: 9, color: '#c9734f', weight: 2, fillColor: '#f0a882', fillOpacity: 0.9,
+      }).bindPopup(
+        `<strong>${esc(m.title)}</strong><br><small>${esc(m.label)}${m.place ? ' · ' + esc(m.place) : ''}</small><br><a href="${esc(m.url)}">글 보기 →</a>`,
+      );
+      return { m, mk };
+    });
+
+    const show = (date: string) => {
+      const group: L.Layer[] = [];
+      layers.forEach(({ m, mk }: any) => {
+        if (!date || m.date === date) { mk.addTo(map); group.push(mk); } else mk.remove();
+      });
+      if (group.length === 0) { map.setView([36.5, 127.8], 6); return; }
+      const b = L.featureGroup(group).getBounds();
+      if (group.length === 1) map.setView(b.getCenter(), 15);
+      else map.fitBounds(b, { padding: [30, 30], maxZoom: 15 });
+    };
+    show('');
+
+    const sel = el.parentElement?.querySelector<HTMLSelectElement>('#map-date');
+    sel?.addEventListener('change', () => show(sel.value));
+  });
+</script>
+
+<style>
+  .map { width: 100%; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); z-index: 0; background: #eee; }
+  .map-filter { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.92rem; }
+  .map-filter select { flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); font: inherit; color: inherit; }
+</style>

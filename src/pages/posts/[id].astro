@@ -1,0 +1,75 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Map from '../../components/Map.astro';
+import { getPosts, formatDate, isoDate, photoSrc, photoAlt, postLocations, withBase } from '../../lib';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { id: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+const locs = postLocations(post);
+const label = formatDate(post.data.date);
+const markers = locs.map((l) => ({
+  ...l, title: post.data.title, date: isoDate(post.data.date), label, url: withBase(`/posts/${post.id}/`),
+}));
+const places = [...new Set(locs.map((l) => l.place).filter(Boolean))];
+---
+<Base title={post.data.title}>
+  <article>
+    <header class="head">
+      <time datetime={post.data.date.toISOString()}>{label}</time>
+      <h1>{post.data.title}</h1>
+      {places.length > 0 && <p class="place">📍 {places.join(' · ')}</p>}
+    </header>
+
+    {post.data.photos.length > 0 && (
+      <div class="photos">
+        {post.data.photos.map((p, i) => (
+          <a href={photoSrc(p)} target="_blank" rel="noopener">
+            <img src={photoSrc(p)} alt={photoAlt(p, post.data.title, i)} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+          </a>
+        ))}
+      </div>
+    )}
+
+    <div class="body"><Content /></div>
+
+    {markers.length > 0 && (
+      <section class="mini-map">
+        <h2>이날의 장소</h2>
+        <Map markers={markers} height="240px" />
+      </section>
+    )}
+  </article>
+
+  <nav class="pager">
+    {older ? <a href={withBase(`/posts/${older.id}/`)}>← {older.data.title}</a> : <span></span>}
+    {newer ? <a href={withBase(`/posts/${newer.id}/`)}>{newer.data.title} →</a> : <span></span>}
+  </nav>
+  <p class="back"><a href={withBase('/')}>목록으로</a></p>
+</Base>
+<style>
+  .head { text-align: center; margin: 4px 0 20px; }
+  .head time { color: var(--muted); font-size: .9rem; }
+  .head h1 { margin: 4px 0 0; font-size: 1.5rem; line-height: 1.4; letter-spacing: -0.01em; }
+  .place { margin: 6px 0 0; color: var(--muted); font-size: .88rem; }
+  .photos { display: grid; gap: 10px; margin: 0 -18px 24px; }
+  .photos img { width: 100%; height: auto; background: #f3ece3; }
+  @media (min-width: 720px) { .photos { margin: 0 0 24px; } .photos img { border-radius: var(--radius); } }
+  .body { font-size: 1.04rem; }
+  .body :global(p) { margin: 0 0 1.1em; }
+  .body :global(img) { border-radius: 12px; margin: 12px 0; }
+  .mini-map { margin-top: 28px; }
+  .mini-map h2 { font-size: 1rem; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line); font-size: .9rem; }
+  .pager a { text-decoration: none; color: var(--muted); max-width: 48%; }
+  .pager a:hover { color: var(--accent); }
+  .back { text-align: center; margin-top: 18px; }
+  .back a { color: var(--accent); text-decoration: none; font-size: .92rem; }
+</style>

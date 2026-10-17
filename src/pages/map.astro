@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import Map from '../components/Map.astro';
+import { getPosts, formatDate, isoDate, postLocations, withBase } from '../lib';
+const posts = await getPosts();
+const markers = posts.flatMap((post) =>
+  postLocations(post).map((l) => ({
+    ...l,
+    title: post.data.title,
+    date: isoDate(post.data.date),
+    label: formatDate(post.data.date),
+    url: withBase(`/posts/${post.id}/`),
+  })),
+);
+---
+<Base title="지도">
+  <h1 class="title">지한이가 다녀온 곳</h1>
+  {markers.length === 0 ? (
+    <section class="empty">
+      <div class="empty-icon">🗺️</div>
+      <p>아직 위치가 있는 일기가 없어요.</p>
+    </section>
+  ) : (
+    <Map markers={markers} height="65vh" filter />
+  )}
+</Base>
+<style>
+  .title { text-align: center; font-size: 1.2rem; margin: 0 0 16px; }
+  .empty { text-align: center; padding: 56px 16px; background: var(--card); border-radius: var(--radius); border: 1px dashed var(--line); color: var(--muted); }
+  .empty-icon { font-size: 2.4rem; }
+</style>

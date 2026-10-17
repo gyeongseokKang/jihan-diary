@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPosts, formatDate, photoSrc, photoAlt, withBase } from '../lib';
+const posts = await getPosts();
+const excerptOf = (body: string = '') => {
+  const t = body.replace(/[#*_`~\[\]!()>-]/g, '').replace(/\s+/g, ' ').trim();
+  return t.length > 90 ? t.slice(0, 90) + '…' : t;
+};
+---
+<Base>
+  {posts.length === 0 ? (
+    <section class="empty">
+      <div class="empty-icon">📖</div>
+      <h2>아직 일기가 없어요</h2>
+      <p>지한이의 첫 이야기가 곧 여기에 담길 거예요.</p>
+    </section>
+  ) : (
+    <ul class="list">
+      {posts.map((post) => {
+        const cover = post.data.photos[0];
+        const excerpt = excerptOf(post.body);
+        return (
+          <li>
+            <a class="card" href={withBase(`/posts/${post.id}/`)}>
+              {cover && (
+                <div class="cover">
+                  <img src={photoSrc(cover)} alt={photoAlt(cover, post.data.title, 0)} loading="lazy" decoding="async" />
+                  {post.data.photos.length > 1 && <span class="count">+{post.data.photos.length - 1}</span>}
+                </div>
+              )}
+              <div class="meta">
+                <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                <h2>{post.data.title}</h2>
+                {excerpt && <p>{excerpt}</p>}
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</Base>
+<style>
+  .empty { text-align: center; padding: 64px 16px; background: var(--card); border-radius: var(--radius); border: 1px dashed var(--line); margin-top: 8px; }
+  .empty-icon { font-size: 2.6rem; }
+  .empty h2 { margin: 8px 0 4px; font-size: 1.2rem; }
+  .empty p { margin: 0; color: var(--muted); }
+  .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+  .card { display: block; text-decoration: none; background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); transition: transform .15s ease, box-shadow .15s ease; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(120, 90, 60, .08); }
+  .cover { position: relative; aspect-ratio: 4 / 3; background: #f3ece3; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .count { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.55); color: #fff; font-size: .78rem; padding: 2px 8px; border-radius: 999px; }
+  .meta { padding: 14px 16px 16px; }
+  time { color: var(--muted); font-size: .85rem; }
+  .meta h2 { margin: 2px 0 4px; font-size: 1.15rem; line-height: 1.4; }
+  .meta p { margin: 0; color: #6b5f56; font-size: .93rem; }
+</style>
