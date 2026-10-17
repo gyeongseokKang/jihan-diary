@@ -6,6 +6,12 @@
 - 지도: https://gyeongseokkang.github.io/jihan-diary/map/
 - `main` 브랜치에 push 하면 GitHub Actions가 빌드해서 GitHub Pages에 자동 배포해요.
 
+> ⚠️ **현재 임시 상태:** 자동 배포 워크플로가 아직 `.github/deploy.yml.template` 에 있어요.
+> 켜기 전까지는 push 후 `npm run deploy:manual` 로 배포해 주세요 (gh-pages 브랜치에 올라가요).
+> 켜는 방법: `gh auth refresh -h github.com -s workflow` 로 권한을 추가한 뒤
+> `git mv .github/deploy.yml.template .github/workflows/deploy.yml` → commit & push →
+> 저장소 Settings › Pages › Source 를 **GitHub Actions** 로 바꾸기.
+
 ## 새 글 올리기
 
 ### 방법 1. 도우미 스크립트 (추천)
