@@ -3,6 +3,7 @@
 # GitHub Actions 자동 배포(.github/workflows/deploy.yml)가 켜지면 필요 없어요.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+rm -rf .astro node_modules/.astro dist   # 이전 빌드 캐시 제거
 npm run build
 touch dist/.nojekyll
 rev=$(git rev-parse --short HEAD)
